@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "988229659030",
+    "firebase_url": "https://shopping-list-3e0e4.firebaseio.com",
+    "project_id": "shopping-list-3e0e4",
+    "storage_bucket": "shopping-list-3e0e4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988229659030:android:d43395241ea0a65805d5b7",
+        "android_client_info": {
+          "package_name": "com.training.shoppinglist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "988229659030-ufcl9epmb7m5k6pm70aji8hueth6le8e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHRlb2_auhNHswS_hRLutL27Iy9C0ExkI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "988229659030-ufcl9epmb7m5k6pm70aji8hueth6le8e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
