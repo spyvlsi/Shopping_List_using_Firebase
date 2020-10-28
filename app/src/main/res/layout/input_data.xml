@@ -21,7 +21,7 @@
                 android:background="@drawable/back_design"
                 android:gravity="center"
                 android:padding="10dp"
-                android:text="Add shopping List"
+                android:text="New product"
                 android:textAppearance="?android:textAppearanceMedium"
                 android:textColor="@android:color/white">
 

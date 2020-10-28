@@ -53,6 +53,9 @@ public class HomeActivity extends AppCompatActivity {
     private FirebaseRecyclerAdapter adapter;
     public LinearLayout root;
 
+    private long backPressedTime;
+    private Toast backToast;
+
 
     @Override
 
@@ -228,6 +231,7 @@ public class HomeActivity extends AppCompatActivity {
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
+
         View myview;
 
 
@@ -277,4 +281,17 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    @Override
+    public void onBackPressed() {
+        if (backPressedTime + 2000 > System.currentTimeMillis()) {
+            backToast.cancel();
+            super.onBackPressed();
+            return;
+        } else {
+            backToast = Toast.makeText(getBaseContext(), "Press back again to exit", Toast.LENGTH_SHORT);
+            backToast.show();
+        }
+        backPressedTime = System.currentTimeMillis();
+    }
 }
