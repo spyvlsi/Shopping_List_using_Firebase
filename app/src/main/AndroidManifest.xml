@@ -15,7 +15,8 @@
         android:theme="@style/AppTheme">
         <activity android:name=".HomeActivity"
             android:noHistory="true"/>
-        <activity android:name=".RegistrationActivity" />
+        <activity android:name=".RegistrationActivity"
+            android:noHistory="true"/>
         <activity android:name=".MainActivity"
             android:noHistory="true">
             <intent-filter>

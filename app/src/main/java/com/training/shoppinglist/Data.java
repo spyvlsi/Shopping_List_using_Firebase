@@ -3,21 +3,16 @@ package com.training.shoppinglist;
 public class Data {
 
     String type;
-    int amount;
+    String amount;
     String note;
-    String date;
-    String id;
 
-    public Data(){
-
+    public Data() {
     }
 
-    public Data(String type, int amount, String note, String date, String id) {
+    public Data(String type, String amount, String note) {
         this.type = type;
         this.amount = amount;
         this.note = note;
-        this.date = date;
-        this.id = id;
     }
 
     public String getType() {
@@ -28,11 +23,11 @@ public class Data {
         this.type = type;
     }
 
-    public int getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 
@@ -42,32 +37,5 @@ public class Data {
 
     public void setNote(String note) {
         this.note = note;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    @Override
-    public String toString() {
-        return "Data{" +
-                "type='" + type + '\'' +
-                ", amount=" + amount +
-                ", note='" + note + '\'' +
-                ", date='" + date + '\'' +
-                ", id='" + id + '\'' +
-                '}';
     }
 }

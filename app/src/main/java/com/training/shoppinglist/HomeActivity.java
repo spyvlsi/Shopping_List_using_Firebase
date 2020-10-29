@@ -7,11 +7,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -19,43 +16,34 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
-import java.text.DateFormat;
-import java.util.Date;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 public class HomeActivity extends AppCompatActivity {
+
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference product = db.collection("product");
 
     private Toolbar toolbar;
 
     private FloatingActionButton fab_btn;
-    private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
 
-    private RecyclerView recyclerView;
-
-    private TextView totalsumResult;
-    private RecyclerView.LayoutManager layoutManager;
-    private FirebaseRecyclerAdapter adapter;
-    public LinearLayout root;
 
     private long backPressedTime;
     private Toast backToast;
 
+    private DataAdapter adapter;
 
     @Override
 
@@ -67,50 +55,11 @@ public class HomeActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Shopping List");
 
-        totalsumResult = findViewById(R.id.total_amount);
-
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser mUser = mAuth.getCurrentUser();
         String uId = mUser.getUid();
 
-
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("Shopping List").child(uId);
-        mDatabase.keepSynced(true);
-
-        recyclerView = findViewById(R.id.recycler_home);
-        recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setHasFixedSize(true);
-        fetch();
-
-        //Total sum number
-
-        mDatabase.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                int totalammount = 0;
-
-                for (DataSnapshot snap : dataSnapshot.getChildren()) {
-
-                    Data data = snap.getValue(Data.class);
-
-                    totalammount += data.getAmount();
-
-                    String sttotal = String.valueOf(totalammount + ".00");
-
-                    totalsumResult.setText(sttotal);
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        setUpRecyclerView();
 
 
         fab_btn = findViewById(R.id.fab);
@@ -123,44 +72,33 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    private void fetch() {
-        Query query = FirebaseDatabase.getInstance()
-                .getReference()
-                .child("dedomena");
+    private void setUpRecyclerView() {
 
-        FirebaseRecyclerOptions<Data> options =
-                new FirebaseRecyclerOptions.Builder<Data>()
-                        .setQuery(query, Data.class)
-                        .build();
+        Query query = product.orderBy("type");
 
-        adapter = new FirebaseRecyclerAdapter<Data, MyViewHolder>(options) {
-            @Override
-            public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_data, parent, false);
+        FirestoreRecyclerOptions<Data> options = new FirestoreRecyclerOptions.Builder<Data>()
+                .setQuery(query, Data.class)
+                .build();
 
-                return new MyViewHolder(view);
-            }
-
-
-            @Override
-            protected void onBindViewHolder(MyViewHolder holder, final int position, Data model) {
-                holder.setDate(model.getDate());
-                holder.setType(model.getType());
-                holder.setNote(model.getNote());
-                holder.setAmount(model.getAmount());
-
-//                holder.root.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View view) {
-//                        Toast.makeText(HomeActivity.this, String.valueOf(position), Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-            }
-
-        };
+        adapter = new DataAdapter(options);
+        RecyclerView recyclerView = findViewById(R.id.recycler_home);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                adapter.deleteItem(viewHolder.getAdapterPosition());
+            }
+        }).attachToRecyclerView(recyclerView);
     }
+
 
     @Override
     protected void onStart() {
@@ -195,7 +133,6 @@ public class HomeActivity extends AppCompatActivity {
                 String mAmount = amount.getText().toString().trim();
                 String mNote = note.getText().toString().trim();
 
-                int amount2 = Integer.parseInt(mAmount);
 
                 if (TextUtils.isEmpty(mType)) {
                     type.setError("No type found!");
@@ -210,56 +147,16 @@ public class HomeActivity extends AppCompatActivity {
                     return;
                 }
 
-
-                String id = mDatabase.push().getKey();
-                String date = DateFormat.getDateInstance().format(new Date());
-                Data data = new Data(mType, amount2, mNote, date, id);
-
-                mDatabase.child(id).setValue(data);
-
-                Toast.makeText(getApplicationContext(), "Data Add", Toast.LENGTH_SHORT).show();
-
-
+                CollectionReference product = FirebaseFirestore.getInstance()
+                        .collection("product");
+                product.add(new Data(mType, mAmount, mNote));
+                Toast.makeText(getBaseContext(), "Success", Toast.LENGTH_SHORT);
                 dialog.dismiss();
             }
         });
 
         dialog.show();
 
-    }
-
-
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-
-
-        View myview;
-
-
-        public MyViewHolder(@NonNull View itemView) {
-            super(itemView);
-            myview = itemView;
-        }
-
-        public void setType(String type) {
-            TextView mType = myview.findViewById(R.id.type);
-            mType.setText(type);
-        }
-
-        public void setNote(String note) {
-            TextView mNote = myview.findViewById(R.id.note);
-            mNote.setText(note);
-        }
-
-        public void setDate(String date) {
-            TextView mDate = myview.findViewById(R.id.date);
-            mDate.setText(date);
-        }
-
-        public void setAmount(int amount) {
-            TextView mAmount = myview.findViewById(R.id.amount);
-            String stam = String.valueOf(amount);
-            mAmount.setText(stam);
-        }
     }
 
     @Override

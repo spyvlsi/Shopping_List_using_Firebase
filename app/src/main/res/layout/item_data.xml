@@ -14,22 +14,6 @@
         android:padding="10dp"
         android:layout_height="wrap_content">
 
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="16 Sep,2018"
-                android:padding="10dp"
-                android:textAppearance="?android:textAppearanceSmall"
-                android:id="@+id/date"
-                android:textColor="#FFB640FF"
-                />
-
-        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="0dp"
